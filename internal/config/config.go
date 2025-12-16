@@ -11,16 +11,25 @@ type Config struct {
 	JWTSecret   string
 	PolicyPath  string
 	MaxRiskScore float64
+	RedisAddr    string
 }
 
 func Load() *Config {
-	return &Config{
+	cfg := &Config{
 		Port:         getEnv("PORT", "8080"),
 		BackendURL:   getEnv("BACKEND_URL", "http://localhost:8081"),
-		JWTSecret:    getEnv("JWT_SECRET", "secret"),
+		JWTSecret:    getEnv("JWT_SECRET", ""), // No default secret
 		PolicyPath:   getEnv("POLICY_PATH", "policies/rbac.rego"),
-		MaxRiskScore: 0.8, // Default threshold
+		MaxRiskScore: 0.8,
+		RedisAddr:    getEnv("REDIS_ADDR", "localhost:6379"),
 	}
+
+	if cfg.JWTSecret == "" {
+		// Fail secure: do not start without a secret
+		panic("JWT_SECRET environment variable is required")
+	}
+
+	return cfg
 }
 
 func getEnv(key, fallback string) string {

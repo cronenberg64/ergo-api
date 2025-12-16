@@ -1,0 +1,42 @@
+package observability
+
+import (
+	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+)
+
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
+}
+
+func Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		rw := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+
+		next.ServeHTTP(rw, r)
+
+		duration := time.Since(start).Seconds()
+		status := strconv.Itoa(rw.statusCode)
+
+		RequestsTotal.With(prometheus.Labels{
+			"method": r.Method,
+			"path":   r.URL.Path,
+			"status": status,
+		}).Inc()
+
+		RequestDuration.With(prometheus.Labels{
+			"method": r.Method,
+			"path":   r.URL.Path,
+		}).Observe(duration)
+	})
+}

@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'ergo-api'
+    static_configs:
+      - targets: ['gateway:8080']
