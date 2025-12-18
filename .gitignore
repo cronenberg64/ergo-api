@@ -1,1 +1,18 @@
+# Binaries
+ergo
+ergo-api
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Config
 .env
+.env.bak
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

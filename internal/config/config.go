@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -15,6 +16,9 @@ type Config struct {
 }
 
 func Load() *Config {
+	// Load .env file if it exists
+	_ = godotenv.Load()
+
 	cfg := &Config{
 		Port:         getEnv("PORT", "8080"),
 		BackendURL:   getEnv("BACKEND_URL", "http://localhost:8081"),
